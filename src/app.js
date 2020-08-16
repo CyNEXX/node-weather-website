@@ -24,10 +24,12 @@ app.use(express.static(publicDirectory));
 
 
 // Load local authentication tokens
+let authOptions;;
 try {
-    const authOptions = auth.get('auth');
+    authOptions = auth.get('auth');
+    console.log(0, 'authOptions', authOptions);
 } catch (e) {
-    return console.log(e);
+    return console.log('err', e);
 }
 
 app.get(['', '/index'], (req, res) => {
@@ -41,6 +43,7 @@ app.get('/weather', (req, res) => {
     if (!req.query.address) { return res.send({ error: 'You must provide a search term' }); }
     const searchString = req.query.address;
     let model = {};
+    console.log(1, 'authOptions', authOptions);
     geoCode(searchString, (error, { longitude, latitude, location } = {}) => {
         if (error) {
             console.log('error', error);
@@ -53,6 +56,7 @@ app.get('/weather', (req, res) => {
         }
 
         forecast(latitude, longitude, (error, forecastData) => {
+            console.log(2, 'authOptions', authOptions);
             if (error) {
                 console.log('error', error);
                 model.error = error; return res.send(model);

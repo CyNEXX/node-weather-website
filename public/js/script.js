@@ -36,7 +36,7 @@ const updateContent = (type, ...data) => {
 
 const getWeather = location => {
     console.log('Loading');
-    fetch('http://127.0.0.1:3000/weather?address=' + location).then(response => response.json().then(data => {
+    fetch('/weather?address=' + location).then(response => response.json().then(data => {
         if (data.error) {
             updateContent('error', data.error);
             return console.log(data.error);

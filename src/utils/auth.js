@@ -1,11 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const e = require('express');
+const DEFAULT_FILE_NAME = 'auth';
 
 const auth = {
     REQUIRED_KEYS: ['weatherstack', 'mapbox'],
-    get(fileName) {
-
+    get(fileName = DEFAULT_FILE_NAME) {
         let dataJSON = {};
         try {
             let dataPath = path.join(__dirname, fileName + '.json');

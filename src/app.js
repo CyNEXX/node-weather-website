@@ -2,9 +2,7 @@ const path = require('path');
 const express = require('express');
 const hbs = require('hbs');
 
-const auth = require('./utils/auth');
-const geoCode = require('./utils/geocode');
-const forecast = require('./utils/forecast');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -23,53 +21,29 @@ hbs.registerPartials(partialsPath);
 app.use(express.static(publicDirectory));
 
 
-// Load local authentication tokens
-let authOptions;;
-try {
-    authOptions = auth.get('auth');
-    console.log(0, 'authOptions', authOptions);
-} catch (e) {
-    return console.log('err', e);
-}
+// Load weather service
+const weatherService = require('./utils/weather-service');
+
 
 app.get(['', '/index'], (req, res) => {
     let model = {};
     model.title = 'Weather';
+    model.longTitle = 'Weather';
     model.name = 'CyNEXX';
     res.render('index', { model });
 });
 
 app.get('/weather', (req, res) => {
-    if (!req.query.address) { return res.send({ error: 'You must provide a search term' }); }
-    const searchString = req.query.address;
     let model = {};
-    console.log(1, 'authOptions', authOptions);
-    geoCode(searchString, (error, { longitude, latitude, location } = {}) => {
-        if (error) {
-            console.log('error', error);
-            model.error = error; return res.send(model);
-        }
-        model.title = 'Weather';
-        model.name = 'CyNEXX';
-        model.address = {
-            longitude, latitude, location,
-        }
-
-        forecast(latitude, longitude, (error, forecastData) => {
-            console.log(2, 'authOptions', authOptions);
-            if (error) {
-                console.log('error', error);
-                model.error = error; return res.send(model);
-            }
-            model.forecastData = forecastData;
-            res.send(model);
-        }, authOptions);
-    }, authOptions);
-
+    return new Promise((resolve, reject) => {
+        
+        if (!req.query.address) { reject({ error: 'You must provide a search term' }); }
+        const search = req.query.address;
+        resolve(weatherService(search));
+    }).then((model) => {
+        res.send(model);
+    }).catch(e => res.send(model.error = e));
 });
-
-
-
 
 app.get('/help', (req, res) => {
     res.render('help', {

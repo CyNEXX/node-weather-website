@@ -2,6 +2,7 @@
 
 const messageOne = document.querySelector('#message-1');
 const messageTwo = document.querySelector('#message-2');
+const pageTitle = document.querySelector('title');
 
 const updateWeather = (data) => {
     messageOne.textContent = data.address.location;
@@ -26,8 +27,10 @@ const updateContent = (type, ...data) => {
             break;
         }
         case 'weather': {
-            messageOne.textContent = data[0].address.location;
-            messageTwo.textContent = data[0].forecastData.longDescription;
+            messageOne.textContent = data[0].location.location;
+            messageTwo.textContent = data[0].longDescription;
+            pageTitle.textContent = data[0].longTitle;
+
             break;
         }
         default: return console.log('Default');
@@ -36,13 +39,17 @@ const updateContent = (type, ...data) => {
 
 const getWeather = location => {
     console.log('Loading');
+
     fetch('/weather?address=' + location).then(response => response.json().then(data => {
         if (data.error) {
             updateContent('error', data.error);
             return console.log(data.error);
         }
         updateContent('weather', data);
-    })).catch(e => { console.log('the catch'); updateContent('error', e.error); console.log(e); });
+    })).catch(e => {
+        console.log('JS client side error', e);
+        updateContent('error', e);
+    });
 };
 
 const weatherForm = document.querySelector('form');
